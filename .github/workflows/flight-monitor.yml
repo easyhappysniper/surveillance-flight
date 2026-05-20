@@ -32,6 +32,8 @@ jobs:
 
       - name: Run flight monitor
         env:
+          GMAIL_EMAIL: ${{ secrets.GMAIL_EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
           QQ_SMTP_CODE: ${{ secrets.QQ_SMTP_CODE }}
           RECIPIENT_EMAIL: kesijin9@gmail.com
