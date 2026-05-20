@@ -21,18 +21,39 @@ class FlightResult:
     destination: str
     travel_date: str
     price_cny: float
+    price_original: float        # 原币种价格
     currency: str
     airline_codes: list[str]
     airline_names: list[str]
     flight_numbers: list[str]
-    departure_time: str          # "2026-08-12 13:30"
-    arrival_time: str            # "2026-08-12 18:40"
+    departure_time: str
+    arrival_time: str
     duration_minutes: int
     stops: int
     stop_airports: list[str]
     cabin_class: str
-    source: str                  # 数据来源标识
+    source: str
     booking_url: str
+
+    def is_teaser(self) -> bool:
+        """检测虚假/ teaser 票价：无航班号且时间为午夜或时长为0"""
+        has_flight = bool(self.flight_numbers and any(f for f in self.flight_numbers))
+        midnight = "T00:00:00" in self.departure_time or "T00:00:00" in self.arrival_time
+        no_duration = self.duration_minutes <= 0
+        return not has_flight and (midnight or no_duration)
+
+    def is_plausible(self) -> bool:
+        """数据质量检查：价格合理 + 非虚假"""
+        if self.price_cny <= 0:
+            return False
+        if self.is_teaser():
+            return False
+        # PEK→CDG 正常直飞 10-12h，中转 14-24h
+        if self.duration_minutes > 0 and self.duration_minutes < 300:
+            return False  # 少于5小时不可能
+        if self.duration_minutes > 2880:
+            return False  # 超过48小时不合理
+        return True
 
 @dataclass
 class SearchError:
@@ -101,23 +122,25 @@ class FlightSearcher:
         )
 
         for date in config.DATES:
-            # 主搜索: PEK→CDG (GF 连接器自动展开城市机场群)
             all_results = self._search_pair("PEK", "CDG", date)
-            log.info(f"{date} PEK→CDG: 获取 {len(all_results)} 条结果")
+            # 过滤虚假/teaser数据
+            valid_results = [r for r in all_results if r.is_plausible()]
+            fake_count = len(all_results) - len(valid_results)
+            if fake_count:
+                log.info(f"{date} PEK→CDG: {len(all_results)}条原始, 剔除{fake_count}条虚假, 保留{len(valid_results)}条")
 
-            # 如果结果太少，补充 PKX→ORY
-            if len(all_results) < 5:
-                log.info(f"{date} 结果较少，补充搜索 PKX→ORY...")
+            if len(valid_results) < 5:
+                log.info(f"{date} 有效结果较少，补充搜索 PKX→ORY...")
                 time.sleep(config.SEARCH_DELAY)
                 extra = self._search_pair("PKX", "ORY", date)
-                all_results.extend(extra)
+                valid_results.extend(r for r in extra if r.is_plausible())
 
-            # 预算过滤 + 排序 (保留所有结果供参考)
-            in_budget = [r for r in all_results if r.price_cny <= config.BUDGET_CNY]
+            # 预算过滤 + 排序
+            in_budget = [r for r in valid_results if r.price_cny <= config.BUDGET_CNY]
             in_budget.sort(key=lambda r: r.price_cny)
             report.results_by_date[date] = in_budget
             report.best_by_date[date] = in_budget[0] if in_budget else (
-                min(all_results, key=lambda r: r.price_cny) if all_results else None
+                min(valid_results, key=lambda r: r.price_cny) if valid_results else None
             )
 
         return report
@@ -198,6 +221,7 @@ class FlightSearcher:
             destination=dest,
             travel_date=date,
             price_cny=round(price_cny, 0),
+            price_original=raw_price,
             currency=currency,
             airline_codes=airline_codes,
             airline_names=airline_names,
@@ -289,6 +313,7 @@ class FlightSearcher:
             destination=dest,
             travel_date=date,
             price_cny=round(price_cny, 0),
+            price_original=raw_price,
             currency=currency,
             airline_codes=airline_codes,
             airline_names=[config.AIRLINE_NAMES.get(c, c) for c in airline_codes],

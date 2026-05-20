@@ -62,6 +62,39 @@ TIMEZONE = "Asia/Shanghai"
 # ---- 报告时段 (北京时间) ----
 REPORT_HOURS = [8, 12, 20]
 
+# ---- 紧急提醒阈值 (CNY) ----
+URGENT_THRESHOLD = 3600
+MAX_RESULTS = 15
+
+# ---- 中转签证政策 (中国护照 + 申根学生签) ----
+# "免签"=免费过境 "过境签"=需要签证 "申根"=已有签证可用
+TRANSIT_POLICY = {
+    "ICN": "免签(持有申根签)", "PUS": "免签(持有申根签)",
+    "NRT": "过境签(Shore Pass)", "HND": "过境签(Shore Pass)", "KIX": "过境签",
+    "IST": "免签(电子签)", "SAW": "免签(电子签)",
+    "DXB": "免签", "AUH": "免签", "DOH": "免签",
+    "ADD": "落地签(免费)", "CAI": "过境签(可能需)",
+    "LHR": "⚠需过境签DATV", "LGW": "⚠需过境签",
+    "HEL": "申根✅", "CDG": "申根✅", "AMS": "申根✅", "FRA": "申根✅",
+    "MUC": "申根✅", "ZRH": "申根✅", "VIE": "申根✅", "MAD": "申根✅",
+    "BCN": "申根✅", "FCO": "申根✅", "MXP": "申根✅", "CPH": "申根✅",
+    "OSL": "申根✅", "ARN": "申根✅", "BRU": "申根✅",
+    "SVO": "过境签(需办)", "DME": "过境签(需办)",
+    "HKG": "免签(中国护照)", "PVG": "国内", "PEK": "国内", "PKX": "国内",
+    "CAN": "国内", "CTU": "国内", "SZX": "国内",
+    "EWR": "⚠需过境签C1",
+    "JFK": "⚠需过境签C1", "LAX": "⚠需过境签C1",
+    "YVR": "⚠需过境签", "YYZ": "⚠需过境签",
+    "SIN": "免签", "KUL": "免签", "BKK": "免签", "DMK": "免签",
+    "MNL": "免签(转机区)", "CGK": "免签",
+    "ALA": "免签", "TAS": "免签",
+    "UBN": "免签", "FRU": "免签",
+    "TLV": "过境签(可能需)",
+}
+
+def get_transit_policy(airport_code: str) -> str:
+    return TRANSIT_POLICY.get(airport_code.upper(), "需核实")
+
 # ---- 邮件配置 (QQ邮箱 SMTP) ----
 # 通过环境变量设置: QQ_EMAIL / QQ_SMTP_CODE
 # QQ邮箱 → 设置 → 账户 → POP3/IMAP/SMTP服务 → 生成授权码
