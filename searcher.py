@@ -43,16 +43,17 @@ class FlightResult:
         return not has_flight and (midnight or no_duration)
 
     def is_plausible(self) -> bool:
-        """数据质量检查：价格合理 + 非虚假"""
+        """数据质量检查"""
         if self.price_cny <= 0:
             return False
         if self.is_teaser():
             return False
-        # PEK→CDG 正常直飞 10-12h，中转 14-24h
+        if self.stops > config.MAX_STOPS:
+            return False
         if self.duration_minutes > 0 and self.duration_minutes < 300:
-            return False  # 少于5小时不可能
+            return False
         if self.duration_minutes > 2880:
-            return False  # 超过48小时不合理
+            return False
         return True
 
 @dataclass
@@ -167,7 +168,7 @@ class FlightSearcher:
 
     def _search_letsfg(self, origin: str, dest: str, date: str) -> list[FlightResult]:
         """LetsFG 搜索 + 标准化转换"""
-        result = self.letsfg.search(origin, dest, date, max_stopovers=config.MAX_STOPS, limit=30)
+        result = self.letsfg.search(origin, dest, date, max_stopovers=config.MAX_STOPS, limit=80)
         flights = []
         for offer in result.offers:
             try:
