@@ -1,0 +1,9 @@
+archive/
+logs/
+__pycache__/
+*.pyc
+.edreams_chrome_data/
+_ita_pre_search.png
+.env
+qq_mail.txt
+.claude/
