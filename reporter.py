@@ -68,7 +68,7 @@ def build_html(report) -> str:
       <td>{_fmt_time(best.arrival_time)}</td>
       <td>{_fmt_dur(best.duration_minutes)}</td>
       <td>{best.stops}停</td>
-      <td><a href="{best.booking_url}">🔗预订</a></td>
+      <td><a href="{best.booking_url}">{best.booking_url[:80]}{'...' if len(best.booking_url) > 80 else ''}</a></td>
     </tr>"""
 
     # 所有在预算内的航班
@@ -86,7 +86,7 @@ def build_html(report) -> str:
       <td>{_fmt_time(r.arrival_time)}</td>
       <td>{_fmt_dur(r.duration_minutes)}</td>
       <td>{r.stops}停</td>
-      <td><a href="{r.booking_url}">🔗</a></td>
+      <td><a href="{r.booking_url}">{r.booking_url[:80]}{'...' if len(r.booking_url) > 80 else ''}</a></td>
     </tr>"""
 
     within = sum(1 for d in config.DATES
@@ -164,7 +164,7 @@ def build_text(report, previous: dict | None = None) -> str:
                 f"{', '.join(best.airline_names):<16} {'+'.join(best.flight_numbers)[:15]:<16} "
                 f"{_fmt_time(best.departure_time):>6} {_fmt_time(best.arrival_time):>6} "
                 f"{_fmt_dur(best.duration_minutes):>7} {best.stops:>3}停 "
-                f"{best.booking_url[:50] if best.booking_url else '-'}"
+                            f"{best.booking_url if best.booking_url else '-'}"
             )
         else:
             lines.append(f"  {date:<12} {'无结果':<22} {'-':>10}")
@@ -188,7 +188,7 @@ def build_text(report, previous: dict | None = None) -> str:
             f"{', '.join(r.airline_names)[:15]:<16} {'+'.join(r.flight_numbers)[:15]:<16} "
             f"{_fmt_time(r.departure_time):>6} {_fmt_time(r.arrival_time):>6} "
             f"{_fmt_dur(r.duration_minutes):>7} {r.stops:>3}停 "
-            f"{r.booking_url[:50] if r.booking_url else '-'}"
+                        f"{r.booking_url[:80] if r.booking_url else '-'}"
         )
 
     # 汇总
