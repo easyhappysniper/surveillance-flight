@@ -88,15 +88,13 @@ def run_once(quick: bool = False, do_email: bool = False):
             print("⚠️ 邮件发送失败，请检查 QQ_EMAIL / QQ_SMTP_CODE 环境变量\n")
 
     # 摘要
-    within = sum(1 for d in config.DATES
-                 if report.best_by_date.get(d) and report.best_by_date[d].price_cny <= config.BUDGET_CNY)
     total = sum(len(v) for v in report.results_by_date.values())
-    log.info(f"搜索完成 — {within}/{len(config.DATES)} 日期在预算内, {total} 个航班, {len(report.errors)} 个错误")
+    log.info(f"搜索完成 — {total} 个有效航班, {len(report.errors)} 个错误")
 
     for date in config.DATES:
         best = report.best_by_date.get(date)
-        if best and best.price_cny <= config.BUDGET_CNY:
-            log.info(f"  ✅ {date}: {best.price_cny:,.0f} CNY — {', '.join(best.airline_names)}")
+        if best:
+            log.info(f"  {date} 最低: {best.price_cny:,.0f} CNY — {', '.join(best.airline_names)}")
 
 
 # ============================================================

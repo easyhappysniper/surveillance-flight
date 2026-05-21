@@ -5,8 +5,8 @@ ORIGIN_AIRPORTS = ["PEK", "PKX"]       # 北京首都 + 大兴
 DEST_AIRPORTS = ["CDG", "ORY"]         # 巴黎戴高乐 + 奥利
 DATES = ["2026-08-12", "2026-08-13", "2026-08-14"]
 MAX_STOPS = 1
-BUDGET_CNY = 4000
 ADULTS = 1
+MAX_RESULTS = 10            # 每个日期返回前N名
 
 # ---- 搜索引擎优先级 ----
 # "letsfg" 在国内可直接用，"fli" 需 VPN
@@ -67,33 +67,48 @@ URGENT_THRESHOLD = 3600
 MAX_RESULTS = 15
 
 # ---- 中转签证政策 (中国护照 + 申根学生签) ----
-# "免签"=免费过境 "过境签"=需要签证 "申根"=已有签证可用
 TRANSIT_POLICY = {
-    "ICN": "免签(持有申根签)", "PUS": "免签(持有申根签)",
-    "NRT": "过境签(Shore Pass)", "HND": "过境签(Shore Pass)", "KIX": "过境签",
-    "IST": "免签(电子签)", "SAW": "免签(电子签)",
+    "ICN": "免签(持申根)", "PUS": "免签(持申根)",
+    "NRT": "过境签ShorePass", "HND": "过境签ShorePass", "KIX": "过境签",
+    "IST": "免签", "SAW": "免签",
     "DXB": "免签", "AUH": "免签", "DOH": "免签",
-    "ADD": "落地签(免费)", "CAI": "过境签(可能需)",
-    "LHR": "⚠需过境签DATV", "LGW": "⚠需过境签",
+    "ADD": "落地签免费", "CAI": "⚠可能需过境签",
+    "LHR": "⚠需DATV过境签", "LGW": "⚠需过境签",
     "HEL": "申根✅", "CDG": "申根✅", "AMS": "申根✅", "FRA": "申根✅",
     "MUC": "申根✅", "ZRH": "申根✅", "VIE": "申根✅", "MAD": "申根✅",
     "BCN": "申根✅", "FCO": "申根✅", "MXP": "申根✅", "CPH": "申根✅",
-    "OSL": "申根✅", "ARN": "申根✅", "BRU": "申根✅",
-    "SVO": "过境签(需办)", "DME": "过境签(需办)",
-    "HKG": "免签(中国护照)", "PVG": "国内", "PEK": "国内", "PKX": "国内",
-    "CAN": "国内", "CTU": "国内", "SZX": "国内",
-    "EWR": "⚠需过境签C1",
-    "JFK": "⚠需过境签C1", "LAX": "⚠需过境签C1",
+    "OSL": "申根✅", "ARN": "申根✅", "BRU": "申根✅", "PRG": "申根✅",
+    "SVO": "⚠需过境签", "DME": "⚠需过境签",
+    "TPE": "需入台证", "HKG": "免签", "PVG": "国内转",
+    "PEK": "国内转", "PKX": "国内转", "CAN": "国内转",
+    "CTU": "国内转", "SZX": "国内转", "XMN": "国内转", "SHA": "国内转",
+    "EWR": "⚠需C1过境签", "JFK": "⚠需C1过境签", "LAX": "⚠需C1过境签",
     "YVR": "⚠需过境签", "YYZ": "⚠需过境签",
     "SIN": "免签", "KUL": "免签", "BKK": "免签", "DMK": "免签",
-    "MNL": "免签(转机区)", "CGK": "免签",
+    "MNL": "免签转机区", "CGK": "免签",
     "ALA": "免签", "TAS": "免签",
     "UBN": "免签", "FRU": "免签",
-    "TLV": "过境签(可能需)",
+    "TLV": "⚠可能需过境签",
 }
 
 def get_transit_policy(airport_code: str) -> str:
     return TRANSIT_POLICY.get(airport_code.upper(), "需核实")
+
+# ---- 行李额度 (经济舱，国际航线) ----
+BAGGAGE = {
+    "TK": "30kg", "CA": "2x23kg", "MU": "2x23kg", "CZ": "2x23kg",
+    "HU": "2x23kg", "3U": "2x23kg", "MF": "2x23kg",
+    "AF": "1x23kg", "KL": "1x23kg", "LH": "1x23kg",
+    "EK": "25kg", "EY": "23kg", "QR": "25kg",
+    "SQ": "25kg", "TG": "25kg", "BR": "2x23kg",
+    "LX": "1x23kg", "OS": "1x23kg",
+    "UA": "1x23kg", "DL": "1x23kg", "AA": "1x23kg",
+    "BA": "1x23kg", "VS": "1x23kg",
+    "SU": "2x23kg", "SV": "23kg",
+}
+
+def get_baggage(airline_code: str) -> str:
+    return BAGGAGE.get(airline_code.upper(), "待查")
 
 # ---- 邮件配置 (QQ邮箱 SMTP) ----
 # 通过环境变量设置: QQ_EMAIL / QQ_SMTP_CODE

@@ -136,12 +136,10 @@ class FlightSearcher:
             if fake_count:
                 log.info(f"  → 剔除{fake_count}条虚假, 保留{len(valid)}条有效")
 
-            in_budget = [r for r in valid if r.price_cny <= config.BUDGET_CNY]
-            in_budget.sort(key=lambda r: r.price_cny)
-            report.results_by_date[date] = in_budget
-            report.best_by_date[date] = in_budget[0] if in_budget else (
-                min(valid, key=lambda r: r.price_cny) if valid else None
-            )
+            # 按CNY价格排序
+            valid.sort(key=lambda r: r.price_cny)
+            report.results_by_date[date] = valid
+            report.best_by_date[date] = valid[0] if valid else None
 
         return report
 
