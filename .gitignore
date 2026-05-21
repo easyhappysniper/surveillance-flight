@@ -7,3 +7,5 @@ _ita_pre_search.png
 .env
 qq_mail.txt
 .claude/
+*.png
+*.xml
